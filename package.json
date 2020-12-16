@@ -1,0 +1,17 @@
+{
+  "name": "hamroMovie",
+  "version": "0.0.1",
+  "description": "To capture movie from hamroMovie",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.17.1",
+    "puppeteer": "^5.1.0"
+  },
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "jungee <jungebah@gmail.com>",
+  "license": "MIT",
+  "repository": "git@github.com:jungeebah/hamroMovie.git"
+}
