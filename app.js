@@ -3,6 +3,37 @@ const app = express();
 const puppeteer = require('puppeteer');
 const port = process.env.PORT || 8080;
 
+function getIflix(urlList, movie, browser) {
+    let movieList = []
+    return new Promise(async (resolve, reject) => {
+        try {
+            const page = await browser.newPage();
+            page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36')
+            for (const n in urlList) {
+                await page.goto(urlList[n]);
+                try {
+                    // await page.waitForSelector('div[class="brandlogos"]');
+                    const brandTitle = await page.$('div[class="brandlogos"]');
+                    const urlBrand = await brandTitle.$$('a')
+                    for (const item of urlBrand) {
+                        const urls = await item.evaluate(item => item.href, item)
+                        if (urls.includes('iflix')) {
+                            movieList.push({ movie: movie[n], url: urls })
+                        }
+                    }
+                }
+                catch (e) {
+                    return reject(e)
+                }
+            };
+            await browser.close();
+            return resolve(movieList);
+        }
+        catch (e) {
+            return reject(e)
+        }
+    })
+}
 
 function iflixSearch() {
     let jsonData = {};
@@ -26,16 +57,25 @@ function iflixSearch() {
                         const infoLink = await item.$('div[class="movies-list-item-content"]');
                         const nameItem = await infoLink.$('div[class="movie-title"]')
                         const movieName = await nameItem.evaluate(nameItem => nameItem.innerText, nameItem);
-                        movieList.push(movieName)
+                        if (movieName !== "") {
+                            if (movieName === "Panche Baja") {
+                                movieList.push('panchebaja')
+                            } else {
+                                movieList.push(movieName)
+                            }
+                        }
                     }
                 }
                 catch (e) {
                     return reject(e)
                 }
             };
+            const movieUrls = movieList.map(a =>
+                `https://nepalimoviedb.com/${a.toLowerCase().replace(/ /g, "-")}`
 
-            jsonData['iflixMovies'] = uniq = [...new Set(movieList)];
-            await browser.close();
+            )
+            const result = await getIflix(movieUrls, movieList, browser)
+            jsonData['iflixMovies'] = uniq = [...new Set(result)];
             return resolve(jsonData);
         }
         catch (e) {
