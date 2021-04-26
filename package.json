@@ -1,15 +1,17 @@
 {
-  "name": "hamroMovie",
+  "name": "Iflix",
   "version": "0.0.1",
-  "description": "To capture movie from hamroMovie",
-  "main": "app.js",
+  "description": "To capture movie from Iflix",
   "dependencies": {
-    "express": "^4.17.1",
-    "puppeteer": "^5.1.0"
+    "@google-cloud/functions-framework": "^1.7.1",
+    "puppeteer": "^9.0.0"
+  },
+  "engines": {
+    "node": ">=12.0.0"
   },
   "scripts": {
-    "start": "node app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "deploy": "gcloud functions deploy nepFlix --trigger-http --runtime nodejs12 --memory 2048MB ",
+    "start": "functions start && functions deploy --source=. nepFlix --trigger-http"
   },
   "author": "jungee <jungebah@gmail.com>",
   "license": "MIT",

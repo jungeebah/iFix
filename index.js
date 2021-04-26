@@ -1,7 +1,19 @@
-const express = require('express');
-const app = express();
+
 const puppeteer = require('puppeteer');
-const port = process.env.PORT || 8080;
+
+const PUPPETEER_OPTIONS = {
+    headless: true,
+    args: [
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--disable-setuid-sandbox',
+        '--no-first-run',
+        '--no-sandbox',
+        '--no-zygote',
+        '--single-process',
+    ],
+};
+
 
 function getIflix(urlList, movie, browser) {
     let movieList = []
@@ -42,10 +54,9 @@ function iflixSearch() {
     const iflixUrl = 'https://nepalimoviedb.com/browse/?fullMovie=iflix&page='
     return new Promise(async (resolve, reject) => {
         try {
-            const browser = await puppeteer.launch({
-                args: ['--no-sandbox', '--disable-setuid-sandbox']
-            });
-
+            const browser = await puppeteer.launch(
+                PUPPETEER_OPTIONS
+            );
             const page = await browser.newPage();
             page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36')
             for (const n in range) {
@@ -83,15 +94,16 @@ function iflixSearch() {
         }
     })
 }
-app.get('/', (req, res) => {
-    (async () => {
-        iflixSearch(req.query.url).then(result => {
-            res.setHeader('Content-Type', 'text/html');
-            res.send(result);
-        }).catch(console.error);
-    })();
-})
 
-app.listen(port, function () {
-    console.log('App listening on port ' + port)
-})
+exports.nepFlix = async (req, res) => {
+    try {
+        const movieList = await iflixSearch()
+        res.status(200).send(movieList);
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+};
+
+
+
+
